@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import MaterialTable from "material-table";
+import GetAppIcon from "@material-ui/icons/GetApp";
+import AddIcon from "@material-ui/icons/Add";
 
 const App = () => {
   const [tableData, setTableData] = useState([
@@ -78,6 +80,37 @@ const App = () => {
     <>
       <MaterialTable
         columns={columns}
+        editable={{
+          onRowAdd: (newRow) =>
+            new Promise((resolve, reject) => {
+              setTableData([...tableData, newRow]);
+              setTimeout(() => resolve(), 500);
+            }),
+          onRowUpdate: (newRow, oldRow) =>
+            new Promise((resolve, reject) => {
+              const updateData = [...tableData];
+              updateData[oldRow.tableData.id] = newRow;
+              setTableData(updateData);
+              setTimeout(() => resolve(), 500);
+            }),
+          onRowDelete: (selectedRow) =>
+            new Promise((resolve, reject) => {
+              const updateData = [...tableData];
+              updateData.splice(selectedRow.tableData.id, 1);
+              setTableData(updateData);
+
+              setTimeout(() => resolve(), 1000);
+            }),
+        }}
+        actions={[
+          {
+            icon: () => <GetAppIcon />,
+            tooltip: "click me",
+            onClick: (e, data) => console.log(data),
+            // isFreeAction: true,
+          },
+        ]}
+        onSearchChange={(selectedRow) => console.log()}
         options={{
           sorting: true,
           search: true,
@@ -91,13 +124,27 @@ const App = () => {
           pageSize: 2,
           paginationType: "stepped",
           showFirstLastPageButtons: false,
-          paginationPosition: "top", //bottom and both
+          paginationPosition: "bottom", //bottom and both and top
           exportButton: true,
           exportAllData: true, // for export all pages of table
           exportFileName: "table data",
+          addRowPosition: "first", //for edit table
+          actionsColumnIndex: -1,
+          selection: true, //for checkbox
+          showSelectAllCheckbox: false, // for removing checkbox for ALL
+          showTextRowsSelected: false, //for removing selection band at top
+          selectionProps: (rowData) => ({
+            disabled: rowData.name == "Raj",
+            // color: "primary",
+          }),
+          grouping: true,
+          columnsButton: true, //time being on top left
+          rowStyle: { background: "#f5f5f5" },
+          headerStyle: { background: "skyblue", fontStyle: "italic" },
         }}
         data={tableData}
         title="student data"
+        icons={{ Add: () => <AddIcon /> }}
       />
     </>
   );
